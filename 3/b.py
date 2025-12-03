@@ -1,35 +1,27 @@
-import re
 
+with open("3/input.txt", "r") as f:
+# with open("3/test.txt", "r") as f:
+    lines = f.readlines()
+    tally = 0
+    for l in lines:
+        number_of_1s_to_remove = max(len(l) - 12, 0)
+        l = l.replace("\n", "")
+        prev_index = 0
+        s = ""
+        for i in range(11, -1, -1):
+            print(f"  {prev_index} {i}")
+            highest_j_index = -1
+            for j in range(prev_index, len(l) - i):
+                if highest_j_index == -1 or int(l[j]) > int(l[highest_j_index]):
+                    highest_j_index = j
+            if highest_j_index >= 0:
+                prev_index = highest_j_index + 1
+                s = s + l[highest_j_index]
 
-def has_pattern(s):
-    return re.match(r"^(.+)(\1)+$", s)
-    # return re.match(r"^(.+?)(?:\\1)+$", s)
-    # cur_pattern = ""
-    # for c in s:
-    #     if cur_pattern
-
-# print(has_pattern("121212"))
-# print(has_pattern("12121"))
-
-# with open("2/test.txt", "r") as f:
-with open("2/input.txt", "r") as f:
-    line = f.readline()
-    line = line.replace("\n", "")
-    all_ranges = line.split(",")
-    invalid_ids_sum = 0
-    for ranges in all_ranges:
-        split = ranges.split("-")
-        if len(split) != 2:
-            continue
-        _l, _h = split
-        l = int(_l)
-        h = int(_h)
-        # print(h-l)
-        for i in range(l, h+1):
-            if has_pattern(f"{i}"):
-                print(f"{l} {h+1}: {i}")
-                invalid_ids_sum += i
-    print(invalid_ids_sum)
+        print(s)
+        tally += int(s)
+        print(l, s)
+    print(tally)
                 
 
         
