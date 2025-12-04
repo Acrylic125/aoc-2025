@@ -1,28 +1,65 @@
 
-with open("3/input.txt", "r") as f:
-# with open("3/test.txt", "r") as f:
+def replace_char_at_pos(original_string, position, new_char):
+  if not (0 <= position < len(original_string)):
+    raise IndexError("Position out of bounds for the given string.")
+  
+  return original_string[:position] + new_char + original_string[position+1:]
+
+# with open("4/test.txt", "r") as f:
+with open("4/input.txt", "r") as f:
     lines = f.readlines()
-    tally = 0
+
+    grid = []
+    marked = []
     for l in lines:
-        number_of_1s_to_remove = max(len(l) - 12, 0)
-        l = l.replace("\n", "")
-        prev_index = 0
-        s = ""
-        for i in range(11, -1, -1):
-            print(f"  {prev_index} {i}")
-            highest_j_index = -1
-            for j in range(prev_index, len(l) - i):
-                if highest_j_index == -1 or int(l[j]) > int(l[highest_j_index]):
-                    highest_j_index = j
-            if highest_j_index >= 0:
-                prev_index = highest_j_index + 1
-                s = s + l[highest_j_index]
+        grid.append(l)
+        marked.append([0] * len(l))
+    print(f"{len(grid)} {len(grid[0])}")
 
-        print(s)
-        tally += int(s)
-        print(l, s)
-    print(tally)
-                
+    dirs = [
+            [1, 0],
+            [0, 1],
+            [1, 1],
+            [1, -1],
+            [-1, 0],
+            [0, -1],
+            [-1, -1],
+            [-1, 1],
+    ]
 
-        
+    prev_tally = 0
+    while True: 
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] != '@':
+                    continue
+                # number_of_rolls = 0
+                rolls = []
+                has_forklift = False
+                for (dx, dy) in dirs:
+                    nx = i + dx
+                    ny = j + dy
+                    if nx < 0 or nx >= len(grid):
+                        continue
+                    if ny < 0 or ny >= len(grid[0]):
+                        continue
+                    if grid[nx][ny] == '.':
+                        has_forklift = True
+                    if grid[nx][ny] == '@':
+                        rolls.append((nx, ny))
+                # print(f"{i} {j} {rolls}")
+                if len(rolls) < 4 and has_forklift:
+                    marked[i][j] = 1
+
+        tally = 0
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                tally += marked[i][j]
+                if marked[i][j] == 1:
+                    grid[i] = replace_char_at_pos(grid[i], j, '.')
+        print(tally)
+        if prev_tally == tally:
+            print(tally)
+            break
+        prev_tally = tally
 
