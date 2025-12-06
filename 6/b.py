@@ -4,30 +4,61 @@ import re
 with open("6/input.txt", "r") as f:
     lines = f.readlines()
 
-    _operands = lines[:-1]
-    _operators = lines[-1]
+    _operands = list(map(lambda v: v.replace('\n', ''), lines[:-1]))
+    _operators = lines[-1].replace('\n', '')
 
     nums = []
-    for o in _operands:
-        o1 = re.sub(r"( )+", ' ', o.strip().replace('\n', '')).split(' ')
-        print(o1)
-        nums.append(list(map(lambda v: int(v), o1)))
+    size = 0
+    for c in _operators:
+        if c != ' ':
+            if size != 0:
+                nums.append(size)
+            size = 1
+        else:
+            size += 1
+    # size -= 1
+    nums.append(size)
 
-    ops = re.sub(r"( )+", ' ', _operators.strip().replace('\n', ''))
-    ops = ops.split(' ')
+    # print(nums)
+    # *   +   *   +  -
+    # 012345678901234
 
-    results = [0] * (len(ops))
-    for i in range(len(nums)):
-        for j in range(len(ops)):
-            n = nums[i][j]
+    # Pad chars
+    # for i in range(len(_operands)):
+    #     _operands[i] = _operands[i].ljust(len(_operators), ' ')
 
-            if i == 0:
-                results[j] = n
-            elif ops[j] == '+':
-                results[j] += n
-            elif ops[j] == '*':
-                results[j] *= n
+    print(_operands)
+
+    results = []
+    for _j, num in enumerate(nums):
+        rows = len(_operands)
+        from_j = sum(nums[:_j])
+        to_j = from_j+num
+        
+        operator = _operators[from_j]
+        tally = 0
+        for j in range(from_j, to_j):
+            val = 0
+            for i in range(rows):
+                if _operands[i][j] == ' ':
+                    # print(f"FUUUU {i} {j}")
+                    continue
+                val *= 10
+                val += int(_operands[i][j])
+            if val == 0:
+                break
+            print(val, operator, tally)
+            # print(val)
+            if j == from_j:
+                tally = val 
+            elif operator == "+":
+                tally += val 
+            elif operator == "*":
+                tally *= val 
+        results.append(tally)
         print(results)
 
-    print(results)
     print(sum(results))
+
+
+
