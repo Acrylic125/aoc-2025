@@ -1,64 +1,76 @@
-import re
 
-# with open("6/test.txt", "r") as f:
-with open("6/input.txt", "r") as f:
+
+
+
+def do_search(grid, i, j, memo):
+    if i < 0 or i >= len(grid):
+        return 1
+    if j < 0 or j >= len(grid[0]):
+        return 1
+
+    hash = f"{i} {j}"
+    if memo.get(hash) != None:
+        return memo[hash]
+
+    if grid[i][j] == '^':
+        v = do_search(grid, i, j - 1, memo) + do_search(grid, i, j + 1, memo)
+        memo[hash] = v
+        return v
+    v = do_search(grid, i + 1, j, memo)
+    memo[hash] = v
+    return v
+
+
+with open("7/test.txt", "r") as f:
+# with open("7/input.txt", "r") as f:
     lines = f.readlines()
 
-    _operands = list(map(lambda v: v.replace('\n', ''), lines[:-1]))
-    _operators = lines[-1].replace('\n', '')
+    grid = [] 
+    for line in lines:
+        s = line.replace('\n', '')
+        grid.append(s)
 
-    nums = []
-    size = 0
-    for c in _operators:
-        if c != ' ':
-            if size != 0:
-                nums.append(size)
-            size = 1
-        else:
-            size += 1
-    # size -= 1
-    nums.append(size)
+    S = (0,0)
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if grid[i][j] == 'S':
+                S = (i, j)
 
-    # print(nums)
-    # *   +   *   +  -
-    # 012345678901234
+    print(do_search(grid, S[0], S[1], {}))
 
-    # Pad chars
-    # for i in range(len(_operands)):
-    #     _operands[i] = _operands[i].ljust(len(_operators), ' ')
-
-    print(_operands)
-
-    results = []
-    for _j, num in enumerate(nums):
-        rows = len(_operands)
-        from_j = sum(nums[:_j])
-        to_j = from_j+num
-        
-        operator = _operators[from_j]
-        tally = 0
-        for j in range(from_j, to_j):
-            val = 0
-            for i in range(rows):
-                if _operands[i][j] == ' ':
-                    # print(f"FUUUU {i} {j}")
-                    continue
-                val *= 10
-                val += int(_operands[i][j])
-            if val == 0:
-                break
-            print(val, operator, tally)
-            # print(val)
-            if j == from_j:
-                tally = val 
-            elif operator == "+":
-                tally += val 
-            elif operator == "*":
-                tally *= val 
-        results.append(tally)
-        print(results)
-
-    print(sum(results))
-
-
-
+    # split_at_hashes = set()
+    # splitters = set()
+    # traversed = set()
+    # beams = [(S[0], S[1])]
+    # while len(beams) > 0:
+    #     (i, j) = beams.pop(0)
+    #     traversed.add(f"{i} {j}")
+    #     if i < 0 or i >= len(grid):
+    #         continue
+    #     if j < 0 or j >= len(grid[0]):
+    #         continue
+    #     if grid[i][j] == '^':
+    #         dirs = [[0, -1], [0, 1]]
+    #         splitters.add(f"{i} {j}")
+    #         for (dx, dy) in dirs:
+    #             hash = f"{i + dx} {j + dy}"
+    #             if hash in split_at_hashes:
+    #                 continue
+    #             split_at_hashes.add(hash)
+    #             beams.append((i + dx, j + dy))
+    #     else:
+    #         beams.append((i + 1, j))
+    #
+    # print(len(splitters))
+    # print(len(split_at_hashes))
+    # for i in range(len(grid)):
+    #     for j in range(len(grid[0])):
+    #         if grid[i][j] == '^':
+    #             print('^', end='')
+    #         elif f"{i} {j}" in traversed:
+    #             print('|', end='')
+    #         else:
+    #             print(grid[i][j], end='')
+    #     print('\n', end='')
+    #
+    #
