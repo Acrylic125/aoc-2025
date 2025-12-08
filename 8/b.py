@@ -1,76 +1,100 @@
 
+def parse_coords(s):
+    x, y, z = s.split(",")
+    return (int(x), int(y), int(z))
 
+def is_same_coords(v1, v2):
+    return v1[0] == v2[0] and v1[1] == v2[1] and v1[2] == v2[2]
 
+def calc_dist(v1, v2):
+    d = 0
+    for i in range(3):
+        _d = v1[i] - v2[i]
+        d += (_d * _d)
+    return d
 
-def do_search(grid, i, j, memo):
-    if i < 0 or i >= len(grid):
-        return 1
-    if j < 0 or j >= len(grid[0]):
-        return 1
-
-    hash = f"{i} {j}"
-    if memo.get(hash) != None:
-        return memo[hash]
-
-    if grid[i][j] == '^':
-        v = do_search(grid, i, j - 1, memo) + do_search(grid, i, j + 1, memo)
-        memo[hash] = v
-        return v
-    v = do_search(grid, i + 1, j, memo)
-    memo[hash] = v
-    return v
-
-
-with open("7/test.txt", "r") as f:
-# with open("7/input.txt", "r") as f:
+# with open("8/test.txt", "r") as f:
+with open("8/input.txt", "r") as f:
     lines = f.readlines()
+    
+    coords = list(map(parse_coords, lines))
 
-    grid = [] 
-    for line in lines:
-        s = line.replace('\n', '')
-        grid.append(s)
+    edges = []
+    for i in range(len(coords)):
+        for j in range(i + 1, len(coords)):
+            edges.append((i, j))
+    
+    # Sort edges 
+    edges.sort(key=lambda v: calc_dist(coords[v[0]], coords[v[1]]))
 
-    S = (0,0)
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
-            if grid[i][j] == 'S':
-                S = (i, j)
+    circuits = [(i, False) for i in range(len(coords))]
 
-    print(do_search(grid, S[0], S[1], {}))
+    last_pair = None
+    while len(edges) > 0:
+        left, right = edges.pop(0)
 
-    # split_at_hashes = set()
-    # splitters = set()
-    # traversed = set()
-    # beams = [(S[0], S[1])]
-    # while len(beams) > 0:
-    #     (i, j) = beams.pop(0)
-    #     traversed.add(f"{i} {j}")
-    #     if i < 0 or i >= len(grid):
-    #         continue
-    #     if j < 0 or j >= len(grid[0]):
-    #         continue
-    #     if grid[i][j] == '^':
-    #         dirs = [[0, -1], [0, 1]]
-    #         splitters.add(f"{i} {j}")
-    #         for (dx, dy) in dirs:
-    #             hash = f"{i + dx} {j + dy}"
-    #             if hash in split_at_hashes:
-    #                 continue
-    #             split_at_hashes.add(hash)
-    #             beams.append((i + dx, j + dy))
-    #     else:
-    #         beams.append((i + 1, j))
-    #
-    # print(len(splitters))
-    # print(len(split_at_hashes))
-    # for i in range(len(grid)):
-    #     for j in range(len(grid[0])):
-    #         if grid[i][j] == '^':
-    #             print('^', end='')
-    #         elif f"{i} {j}" in traversed:
-    #             print('|', end='')
-    #         else:
-    #             print(grid[i][j], end='')
-    #     print('\n', end='')
-    #
-    #
+        # Find left parent
+        left_parent = circuits[left][0]
+        while left_parent != circuits[left_parent][0]:
+            left_parent = circuits[left_parent][0]
+
+        # Find right parent
+        right_parent = circuits[right][0]
+        while right_parent != circuits[right_parent][0]:
+            right_parent = circuits[right_parent][0]
+
+        if left_parent != right_parent:
+            last_pair = (left, right)
+
+        # Left connects to right
+        circuits[left_parent] = (right_parent, True)
+
+        # all_true = True
+        # for c in circuits:
+        #     if not c[1]:
+        #         all_true = False 
+        #         break
+        # if all_true:
+        #     break
+
+        all_circuits = set()
+        for i in range(len(circuits)):
+            parent, _ = circuits[i]
+            while parent != circuits[parent][0]:
+                parent = circuits[parent][0]
+            all_circuits.add(parent)
+            if len(all_circuits) > 1:
+                break
+        if len(all_circuits) == 1:
+            break
+            
+        # all_connected = True 
+        # for circuit in circuits:
+        #     if not circuit[1]:
+        #         all_connected = False
+        #         break
+        # if all_connected:
+        #     print(coords[left][0] * coords[right][0])
+        #     break
+    assert last_pair != None
+    print(coords[last_pair[0]][0] * coords[last_pair[1]][0])
+
+    # circuit_sizes = {}
+    # for i in range(len(circuits)):
+    #     parent, _ = circuits[i]
+    #     while parent != circuits[parent][0]:
+    #         parent = circuits[parent][0]
+    #     if circuit_sizes.get(f"{parent}") == None:
+    #         circuit_sizes[f"{parent}"] = 0
+    #     circuit_sizes[f"{parent}"] += 1
+    
+    # all_vs = []
+    # for k in circuit_sizes:
+    #     v = circuit_sizes[k]
+    #     if v > 1:
+    #         all_vs.append(v)
+    # all_vs.sort(reverse=True)
+    # print(all_vs[0] * all_vs[1] * all_vs[2])
+
+    # for v1, v2 in edges:
+    #     print(v1, v2)
